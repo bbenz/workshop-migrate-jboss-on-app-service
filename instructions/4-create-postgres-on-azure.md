@@ -1,38 +1,28 @@
-# Create and Configure PostgreSQL on Azure
+# 4 - Create and Configure PostgreSQL on Azure
 
 In the previous exercise, you migrated a Jakarta EE app to JBoss EAP and ran it in your developer environment with a pre-provisioned database.
 
 In this exercise we'll deploy [Azure Database for PostgreSQL](https://azure.microsoft.com/en-us/services/postgresql) and reconfigure our application to use it when deploying to our already-created Azure App Service instance of JBoss EAP.
 
-## Overview of Postgres pricing tiers
+## 4.1 - Overview of Postgres pricing tiers
 
 Azure Database for PostgreSQL offers several options to meet your data needs.
 
-*Single Server* is a preconfigured database server and is best for workloads where the database have minimal customization requirements. This is what we will use in today's workshop.
-
-*Flexible Server* provides maximum control for your database with a simplified developer experience and is best for workloads that require things like custom maintenance windows, zone redunant high availability, and start/stop capabilities or burstable SKUs for cost optimization.
-
-*Hyperscale* provides horizontal scale-out capability to hundreds of nodes and is best for high performance workloads that require dynamic scalability, or require transactional and analytical queries to run on the same database.
+- *Single Server* is a preconfigured database server and is best for workloads where the database have minimal customization requirements. This is what we will use in today's workshop.
+- *Flexible Server* provides maximum control for your database with a simplified developer experience and is best for workloads that require things like custom maintenance windows, zone redunant high availability, and start/stop capabilities or burstable SKUs for cost optimization.
+- *Hyperscale* provides horizontal scale-out capability to hundreds of nodes and is best for high performance workloads that require dynamic scalability, or require transactional and analytical queries to run on the same database.
 
 [Learn more about Azure Database for Postgres Pricing](https://azure.microsoft.com/en-us/pricing/details/postgresql/server/).
 
-## Exercise: Create Postgres DB
+## 4.2 - Exercise: Create Postgres DB
 
-You can create Postgres databases using the Azure Portal or Azure CLI. Let's use the Azure CLI. First, create an environment variable that will store the name of your database:
+You can create Postgres databases using the Azure Portal or Azure CLI. Let's use the Azure CLI. 
 
-> **NOTE**: Replace **<your_name>** with a unique name (for example, the initials of your name) as this value must be unique for each user. We'll also set variables for the database username and password for later use (feel free to use different values for those, or just use the defaults below)
-
-```bash
-export SERVER_NAME=<your_name>-postgres-database
-export DB_USERNAME=cooladmin
-export DB_PASSWORD=EAPonAzure1
-```
-
-Then, to create the database service (using the default SKU and PostgreSQL version 11), run the following command:
+To create the database service (using the default SKU and PostgreSQL version 11), run the following command:
 
 ```bash
 az postgres server create --resource-group $RESOURCE_GROUP \
-  --name $SERVER_NAME --location $LOCATION --admin-user $DB_USERNAME \
+  --name $DB_SERVER_NAME --location $LOCATION --admin-user $DB_USERNAME \
   --admin-password $DB_PASSWORD --sku-name GP_Gen5_2 --version 11
 ```
 
@@ -41,14 +31,14 @@ az postgres server create --resource-group $RESOURCE_GROUP \
 This will take 3-4 minutes to complete. One complete, verify that the database was created with this command:
 
 ```bash
-az postgres server show -g $RESOURCE_GROUP -n $SERVER_NAME
+az postgres server show -g $RESOURCE_GROUP -n $DB_SERVER_NAME
 ```
 
 Now we can use `az postgres server list` to save the full name of our database to an environment variable that we will use later. Run this command:
 
 ```bash
 export SERVER_FQDN=$(az postgres server show -g $RESOURCE_GROUP \
-  -n $SERVER_NAME | jq -r .fullyQualifiedDomainName) && \
+  -n $DB_SERVER_NAME | jq -r .fullyQualifiedDomainName) && \
   echo $SERVER_FQDN
 ```
 
@@ -62,19 +52,19 @@ Next, we'll need to allow access to the database from services within Azure (lik
 
 ```bash
  az postgres server firewall-rule create -g $RESOURCE_GROUP \
-   -s $SERVER_NAME -n AllowAllWindowsAzureIps \
+   -s $DB_SERVER_NAME -n AllowAllWindowsAzureIps \
    --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
 ```
 
 Next, create a database named `monolith` within Postgres with this command:
 
 ```bash
-az postgres db create -g $RESOURCE_GROUP -s $SERVER_NAME -n monolith
+az postgres db create -g $RESOURCE_GROUP -s $DB_SERVER_NAME -n monolith
 ```
 
 Now that we have the database, let's move on to configuring our App Service to use it!
 
-## Configure EAP on App Service for Postgres
+## 4.3 - Configure EAP on App Service for Postgres
 
 When EAP is deployed to App Service, it is deployed as a read-only image that isn't designed to be manually configured as you would a traditional on-prem EAP deployment, because if the service is restarted, those changes will disappear. But there is a _startup hook_ and a writeable filesystem (that does not reset between reboots) you can use to configure EAP with custom settings. We'll use this for our database configuration.
 
@@ -113,7 +103,8 @@ It should report:
 ```
 <path>/setup/postgresql.jar: Java archive data (JAR)
 ```
-### Create Application Settings
+
+### 4.3.1 - Create Application Settings
 
 The scripts above refer to a number of environment variables that must be set on the EAP App Service. On the Azure Portal, navigate to _Home > All Resources_ once again, and you should see your _App Service_ that you created earlier, alongside your Postgres Database.
 
@@ -127,7 +118,7 @@ Here, you will need create 3 new settings. You can print out the values you'll n
 
 ```bash
 echo "POSTGRES_CONNECTION_URL --> jdbc:postgresql://${SERVER_FQDN}:5432/monolith?sslmode=require" && \
-echo "POSTGRES_SERVER_ADMIN_FULL_NAME --> ${DB_USERNAME}@${SERVER_NAME}" && \
+echo "POSTGRES_SERVER_ADMIN_FULL_NAME --> ${DB_USERNAME}@${DB_SERVER_NAME}" && \
 echo "POSTGRES_SERVER_ADMIN_PASSWORD --> $DB_PASSWORD"
 ```
 Create a new Application Setting for each of the above by clicking on **New Application Setting** and filling in the values and clicking OK:
@@ -143,7 +134,7 @@ You can also use the `az` command line to accomplish the same thing:
 ```bash
 az webapp config appsettings set -g $RESOURCE_GROUP -n $WEBAPP_NAME --settings \
   "POSTGRES_CONNECTION_URL=jdbc:postgresql://$SERVER_FQDN:5432/monolith?sslmode=require" \
-  "POSTGRES_SERVER_ADMIN_FULL_NAME=${DB_USERNAME}@${SERVER_NAME}" \
+  "POSTGRES_SERVER_ADMIN_FULL_NAME=${DB_USERNAME}@${DB_SERVER_NAME}" \
   "POSTGRES_SERVER_ADMIN_PASSWORD=$DB_PASSWORD"
 ```
 
@@ -152,19 +143,19 @@ These values will be read by the scripts and EAP to configure Postgres. To make 
 ```bash
 az webapp deploy --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME \
     --src-path $GITPOD_REPO_ROOT/setup/postgresql.jar  \
-    --target-path /home/site/libs/postgresql.jar --type lib && \
+    --target-path /home/site/libs/postgresql.jar --type lib --restart false && \
 \
 az webapp deploy --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME \
     --src-path $GITPOD_REPO_ROOT/setup/jboss-cli-commands.cli  \
-    --target-path /home/site/libs/jboss-cli-commands.cli --type lib && \
+    --target-path /home/site/libs/jboss-cli-commands.cli --type lib --restart false && \
 \
 az webapp deploy --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME \
-  --src-path $GITPOD_REPO_ROOT/setup/startup.sh  --type startup
+  --src-path $GITPOD_REPO_ROOT/setup/startup.sh  --type startup --restart true
 ```
 
-The `--type` argument informs where the files are placed on the app service. This will also trigger the app to restart to apply the new configuration. We should now have a fully deployed EAP instance on App Service with support for PostgreSQL.
+The `--type` argument informs where the files are placed on the app service. This will also trigger the app to restart to apply the new configuration. In the next section you will set up GitHub Actions to continiously build and deploy your CoolStore application to App Service.
 
-## Exercise: Push your changes to your repository
+## 4.4 - Exercise: Push your changes to your repository
 
 In this exercise you've made several changes to key source files for the Java application, as well as some configuration files. Let's push all of that to your personal repository fork.
 
@@ -186,11 +177,10 @@ With your commit done, you can now _push_ that commit up to your GitHub reposito
 
 If you then browse your your GitHub repository in a separate tab (e.g. _https://github.com/JoeSmith/workshop-migrate-jboss-on-app-service_), you should see your newest commit at the top with the same comment you entered. Congratulations! You can repeat this step as you make changes.
 
-**Congratulations!** You now have deployed a PostgreSQL database and enabled it for use in JBoss EAP, but you have not yet deployed the Cool Store application to App Service. In the next section, you will set up automation to deploy and redeploy the app each time you wish to make a change.
+**Congratulations!** You now have deployed a PostgreSQL database and connected it to your JBoss EAP instance running on App Service, but you have not yet deployed any application to EAP. In the next section, you will set up automation to deploy and redeploy the app each time you wish to make a change.
 
 ---
 
-⬅️ Previous section: [2 - Migrate a WebLogic app to JBoss EAP](2-migrate-weblogic-to-jboss.md)
+⬅️ Previous section: [3 - Migrate a WebLogic app to JBoss EAP](3-migrate-weblogic-to-jboss.md)
 
-➡️ Next section: [4 - Deploy with GitHub Actions](4-set-up-github-actions.md)
-
+➡️ Next section: [5 - Deploy with GitHub Actions](5-set-up-github-actions.md)

@@ -1,8 +1,8 @@
-# Migrate WebLogic to JBoss
+# 3 - Migrate WebLogic to JBoss
 
 In this module you’ll work with an existing Java EE application designed for a retail store, _CoolStore_. The current version of the CoolStore is a Java EE application built for Oracle _WebLogic_ Application Server. As part of a modernization strategy you've decided to move this application to _JBoss EAP_.
 
-### What is JBoss Enterprise Application Platform (JBoss EAP)?
+## 3.1 - What is JBoss Enterprise Application Platform (JBoss EAP)?
 
 [JBoss EAP](https://www.redhat.com/en/technologies/jboss-middleware/application-platform) is an open source platform for highly transactional, web-scale Java applications. JBoss EAP combines the familiar and popular Jakarta EE specifications with the latest technologies, like Eclipse MicroProfile, to modernize your applications from traditional Java EE into the new world of DevOps, cloud, containers, and microservices.
 
@@ -10,7 +10,7 @@ JBoss EAP includes everything needed to build, run, deploy, and manage enterpris
 
 More features and benefits of JBoss EAP are here:
 
-* **Java certified** - Support the leading Java standards and specifications including Jakarta EE 8, Java SE 11 ([OpenJDK](https://developers.redhat.com/products/openjdk/overview) and Oracle JDK), and Eclipse MicroProfile.
+* **Java certified** - Support the leading Java standards and specifications including Jakarta EE 8, Java SE 8, 11 and 17 ([OpenJDK](https://developers.redhat.com/products/openjdk/overview) and Oracle JDK), and Eclipse MicroProfile.
 * **Optimizing for the Cloud** - Highly efficient and optimized for container and cloud deployments including [Red Hat OpenShift](https://developers.redhat.com/products/openshift/overview). JBoss EAP offers an extremely low memory footprint, fast start-up times, and efficient resource utilization.
 * **Modular and lightweight** - Provide a modular structure that allows service enabling only when required, improving startup speed to build a modern application platform.
 * **Enterprise performance** - Provide a flexible web server, Undertow, as well as enterprise features such as failover, clustering, caching, intelligent load balancing, and distributed deployment performance-tuned for highly transactional applications.
@@ -28,7 +28,7 @@ JBoss EAP is based upon the popular open source project [WildFly](https://jbosso
 | 7.1      | 11       |
 | 7.0      | 10       |
 
-### What is the Migration Toolkit for Applications?
+## 3.2 - What is the Migration Toolkit for Applications?
 
 <p align="center">
     <img src="../img/2-mta_logo.png" width=500 align=center>
@@ -47,7 +47,7 @@ It is used by organizations for:
 
 Read more about it in the [MTA documentation](https://access.redhat.com/documentation/en-us/migration_toolkit_for_applications/)
 
-## Exercise 1 - Analyze app using MTA IDE Plugin
+## 3.3 - Exercise: Analyze app using MTA IDE Plugin
 
 In this step we will analyze a monolithic application built for use with Oracle WebLogic Server (WLS). This application is a Java EE application using a number of different technologies, including standard Java EE APIs as well as proprietary WebLogic APIs and best practices.
 
@@ -55,7 +55,8 @@ For this lab, we will use the MTA [IDE Plugin](https://access.redhat.com/documen
 
 The IDE Plugin for the Migration Toolkit for Applications provides assistance directly in Gitpod for developers making changes for a migration or modernization effort. It analyzes your projects using MTA, marks migration issues in the source code, provides guidance to fix the issues, and offers automatic code replacement when possible.
 
-### 1-1. Access Your Development Environment
+### 3.3.1 - Access Your Development Environment
+
 ----
 
 You will be using Gitpod, a cloud-powered development environments based on [Visual Studio Code](https://code.visualstudio.com/) including the code editor, terminal, debugger, settings sync, and any extension. __Changes to files are auto-saved every few seconds__, so you don’t need to explicitly save changes.
@@ -66,13 +67,14 @@ You already started your IDE in a previous step, and you can see that the projec
     <img src="../img/2-gitpod-explorer.png" width=900 align=center>
 </p>
 
-You can see icons on the left for navigating between project explorer, search, version control (e.g. Git), debugging, and other plugins. You’ll use these during the course of this workshop. Feel free to click on them and see what they do:
+You can see icons on the left for navigating between project explorer, search, source control  (e.g. Git), debugging, and other plugins. You’ll use these during the course of this workshop. Feel free to click on them and see what they do:
 
 <p align="center">
     <img src="../img/2-gitpod-icons.png" width=400 align=center>
 </p>
 
-### 1-2. Use the configuration editor to setup the analysis
+### 3.3.2 - Use the configuration editor to setup the analysis
+
 ----
 
 Click on `MTA Explorer` icon on the left, you will see a new MTA configuration is automatically added. To input source files and directories, click on `Add` then select `Open File Explorer`:
@@ -101,7 +103,8 @@ Find and click on the `--source` checkbox then select `weblogic` to indicate tha
 <img src="../img/2-mta-source.png" width=700 align=center>
 </p>
 
-### 1-3. Run an analysis report
+### 3.3.3 - Run an analysis report
+
 ----
 
 Right-click on *mtaConfiguration* to analyze the WebLogic application. Click on `Run` in the popup menu:
@@ -110,13 +113,14 @@ Right-click on *mtaConfiguration* to analyze the WebLogic application. Click on 
 <img src="../img/2-mta-run-report.png" width=700 align=center>
 </p>
 
-Migration Toolkit for Applications (MTA) CLI will be executed automatically in a new terminal and it will take a minute or less to complete the analysis. Once it's done, click on `Open Report` in the pop-up:
+Migration Toolkit for Applications (MTA) CLI will be executed automatically in a new terminal in GitPod and it will take a minute or less to complete the analysis. Once it's done, click on `Open Report` in the pop-up:
 
 <p align="center">
 <img src="../img/2-mta-analysis-complete.png" width=700 align=center>
 </p>
 
-### 1-4. Review the report
+### 3.3.4 - Review the report
+
 ----
 
 <p align="center">
@@ -131,7 +135,8 @@ The main landing page of the report lists the applications that were processed. 
 <img src="../img/2-mta_project_overview.png" width=900 align=center>
 </p>
 
-### 1-5. Understanding the report
+### 3.3.5 - Understanding the report
+
 ----
 
 The Dashboard gives an overview of the entire application migration effort. It summarizes:
@@ -146,14 +151,15 @@ You can use this report to estimate how easy/hard each app is, and make decision
 
 On to the next step to change the code!
 
-# Exercise 2 - Migrate your application to JBoss EAP
+## 3.4 - Exercise: Migrate your application to JBoss EAP
 
 In this step you will migrate some WebLogic-specific code in the app to use standard (Jakarta EE) interfaces.
 
-### 2-1. Jump to Code
+### 3.4.1 - Jump to Code
+
 ----
 
-Let's jump to code containing identified migration issues. Expand the **workshop-migrate-jboss-on-app-service** source project in the MTA explorer and navigate to `workshop-migrate-jboss-on-app-service > src > main > java > com > redhat > coolstore > utils > StartupListener.java`. Be sure to click the arrow next to the actual class name `StartupListener.java` to expand and show the Hints:
+Let's jump to code containing identified migration issues. Expand the **workshop-migrate-jboss-on-app-service** source project in the _Migration Toolkit for Applications_ and navigate to `workshop-migrate-jboss-on-app-service > src > main > java > com > redhat > coolstore > utils > StartupListener.java`. Be sure to click the arrow next to the actual class name `StartupListener.java` to expand and show the Hints:
 
 **_TIP:_** You can use [CTRL+p] (or [CMD+p] on macOS) to quickly open a file. Simply start typing the name of the file in the text box that appears and select your file from the list that is produced.
 
@@ -167,10 +173,11 @@ In the Explorer, MTA issues use an icon to indicate their severity level and sta
 <img src="../img/2-mta-issues-table.png" width=700 align=center>
 </p>
 
-### 2-2. View Details about the Migration Issues
+### 3.4.2 - View Details about the Migration Issues
+
 ----
 
-Let's take a look at the details about the migration issue. Right-click on `WebLogic ApplicationLifecycleListenerEvent[rule-id:xxx]` in _Hints_ of _StartupListener.java_ file. Click on `View Details`:
+Let's take a look at the details about the migration issue. Right-click on `WebLogic ApplicationLifecycleListener[rule-id:xxx]` in _Hints_ of _StartupListener.java_ file. Click on `View Details`:
 
 <p align="center">
 <img src="../img/2-mta-issue-detail.png" width=900 align=center>
@@ -184,13 +191,14 @@ MTA also provides helpful links to understand the issue deeper and offer guidanc
 
 The WebLogic `ApplicationLifecycleListener` abstract class is used to perform functions or schedule jobs in Oracle WebLogic, like server start and stop. In this case we have code in the `postStart` and `preStop` methods which are executed after WebLogic starts up and before it shuts down, respectively.
 
-In Jakarta EE, there is no equivalent to intercept these events, but you can get equivalent functionality using a _Singleton EJB_ with standard annotations, as suggested in the issue in the MTA report.
+In Jakarta EE, there is no equivalent to intercept these events so the _ApplicationLifecycleListener_ need to be removed. Instead, you can get equivalent functionality using a _Singleton EJB_ with standard annotations, as suggested in the issue in the MTA report.
 
-We will use the `@Startup` annotation to tell the container to initialize the singleton session bean at application start. We will similarly use the `@PostConstruct` and `@PreDestroy` annotations to specify the methods to invoke at the start and end of the application lifecyle achieving the same result but without using proprietary interfaces.
+We will use the `@Startup` annotation to tell the container to initialize the singleton session bean at application start. We will similarly use the `@PostConstruct` and `@PreDestroy` annotations to specify the methods to invoke at the start and end of the application lifecycle achieving the same result but without using proprietary interfaces.
 
 Using this method makes the code much more portable.
 
-### 2-3. Fix the ApplicationLifecycleListener issues
+### 3.4.3 - Fix the ApplicationLifecycleListener issues
+
 ----
 
 In this section we're going to deal with the following two issues from the report:
@@ -199,7 +207,7 @@ In this section we're going to deal with the following two issues from the repor
 <img src="../img/2-report_applifecycle_issues.png" width=900 align=center>
 </p>
 
-To begin we are fixing the issues under the Monolith application. Right-click on `WebLogic ApplicationLifecycleListenerEvent[rule-id:xxx]` in _Hints_ of _StartupListener.java_ file. Click on `Open Code`:
+To begin we are fixing the issues under the Monolith application. Right-click on `WebLogic ApplicationLifecycleListener[rule-id:xxx]` in _Hints_ of _StartupListener.java_ file. Click on `Open Code`:
 
 <p align="center">
 <img src="../img/2-mta-issue-open-code.png" width=900 align=center>
@@ -241,10 +249,11 @@ public class StartupListener {
 
 **_NOTE:_** Where is the Save button? Gitpod will __autosave__ your changes, that is why you can’t find a SAVE button - no more losing code because you forgot to save. You can undo with `CTRL-Z` (or `CMD-Z` on a macOS) or by using the `Edit -> Undo` menu option.
 
-### 2-4. Test the build
+### 3.4.4 - Test the build
+
 ----
 
-In the terminal, run the following command to test the build:
+In the GitPod terminal, run the following command to test the build:
 
 ```shell
 mvn -f $GITPOD_REPO_ROOT clean package
@@ -260,19 +269,20 @@ If it builds successfully (you will see `BUILD SUCCESS`), let’s move on to the
 <img src="../img/2-gitpod-build-result.png" width=700 align=center>
 </p>
 
-### View the diffs
+### 3.4.5 - View the diffs
 
-You can review the changes you've made. On the left, click on the _Version Control_ icon, which shows a list of the changed files. Click on `StartupListener.java` to view the differences you've made:
+You can review the changes you've made. On the left, click on the _Source Control_ icon, which shows a list of the changed files. Click on `StartupListener.java` to view the differences you've made:
 
 <p align="center">
 <img src="../img/2-gitpod-diffs.png" width=700 align=center>
 </p>
 
-Git keeps track of the changes you make, and you can use version control to check in, update, and compare files as you change them.
+Git keeps track of the changes you make, and you can use source control  to check in, update, and compare files as you change them.
 
 For now, go back to the _Explorer_ tree and lets fix the remaining issues.
 
-### 2-5. Fix the logger issues
+### 3.4.6 - Fix the logger issues
+
 ----
 
 In this section we'll be looking to remediate this part of the migration report:
@@ -409,7 +419,8 @@ public class PromoService implements Serializable {
 
 That one was pretty easy.
 
-### 2-6. Test the build
+### 3.4.7 - Test the build
+
 ----
 
 Build and package the app again just as before:
@@ -420,7 +431,8 @@ mvn -f $GITPOD_REPO_ROOT clean package
 
 If builds successfully (you will see `BUILD SUCCESS`), then let’s move on to the next issue! If it does not compile, verify you made all the changes correctly and try the build again.
 
-### 2-7. Remove the WebLogic EJB Descriptors
+### 3.4.8 - Remove the WebLogic EJB Descriptors
+
 ----
 
 In this and the following few sections we'll be addressing this part of the report:
@@ -449,7 +461,8 @@ Whilst still in the Project Explorer, right-click on the `src/main/java/weblogic
 <img src="../img/2-gitpod-delete-weblogic.png" width=700 align=center>
 </p>
 
-### 2-8. Fix the code
+### 3.4.9 - Fix the code
+
 ----
 
 Lastly, remove Maven dependency on **org.jboss.spec.javax.rmi:jboss-rmi-api_1.0_spec**. In JBoss EAP 7.3 (or later), artifact with groupId _org.jboss.spec.javax.rmi_ and artifactId _jboss-rmi-api_1.0_spec_ are unsupported dependencies. Remove the following dependency in `pom.xml`:
@@ -458,7 +471,8 @@ Lastly, remove Maven dependency on **org.jboss.spec.javax.rmi:jboss-rmi-api_1.0_
 <img src="../img/2-mta-remove-dependency.png" width=700 align=center>
 </p>
 
-### 2-9. Test the build
+### 3.4.10 - Test the build
+
 ----
 
 Build once again:
@@ -469,24 +483,26 @@ mvn -f $GITPOD_REPO_ROOT clean package
 
 If builds successfully (you will see `BUILD SUCCESS`). If it does not compile, verify you made all the changes correctly and try the build again.
 
-### 2-10. Re-run the MTA report
+### 3.4.11 - Re-run the MTA report
+
 ----
 
 In this step we will re-run the MTA report to verify our migration was successful.
 
-In the MTA explorer, right-click on *mtaConfiguration* to analyze the WebLogic application once again. Click on `Run` in the popup menu:
+In the _Migration Toolkit for Applications_, right-click on *mtaConfiguration* to analyze the WebLogic application once again. Click on `Run` in the popup menu:
 
 <p align="center">
 <img src="../img/2-mta-rerun-report.png" width=700 align=center>
 </p>
 
-Migration Toolkit for Applications (MTA) CLI will be executed automatically in a new terminal then it will take less than a minute to complete the analysis. Click on `Open Report`:
+Migration Toolkit for Applications (MTA) CLI will be executed automatically in a new terminal in GitPod then it will take less than a minute to complete the analysis. Click on `Open Report`:
 
 <p align="center">
 <img src="../img/2-mta-analysis-rerun-complete.png" width=700 align=center>
 </p>
 
-### 2-11. View the results
+### 3.4.12 - View the results
+
 ----
 
 Click on the latest result to go to the report web page and verify that it now reports 0 Story Points:
@@ -500,28 +516,31 @@ You have successfully migrated this app to JBoss EAP, congratulations!
 **_NOTE:_** You should be aware that this type of migration is more involved than the previous steps, and in real world applications it will rarely be as simple as changing one line at a time for a migration. Consult the [MTA documentation](https://access.redhat.com/documentation/en-us/migration_toolkit_for_applications/) for more
 detail on Red Hat’s Application Migration strategies or contact your local Red Hat representative to learn more about how Red Hat can help you on your migration path.
 
-### 2-12. Test the application on JBoss EAP locally
+### 3.4.13 - Test the application on JBoss EAP locally
+
 ----
 
-In this development environment (GitPod), a JBoss EAP server is already running with a PostgreSQL database. Click on `Start Wildfly server` terminal, take a look at if the EAP server is running properly:
+In this development environment (GitPod), a JBoss EAP server is already running with a PostgreSQL database. Click on `Start Wildfly server` terminal in GitPod, take a look at if the EAP server is running properly:
 
 <p align="center">
 <img src="../img/2-eap-running.png" width=700 align=center>
 </p>
 
-Copy the packaged application (.war file) to the running EAP server. Run the following command in the `Pre-warm Maven` Terminal:
+Copy the packaged application (.war file) to the running EAP server. Run the following command in the `Pre-warm Maven` terminal in GitPod:
 
 ```shell
-cp /workspace/workshop-migrate-jboss-on-app-service/target/ROOT.war /workspace/deployments/
+cp $GITPOD_REPO_ROOT/target/ROOT.war /workspace/deployments/
 ```
 
-Go back to the `Start Wildfly server` terminal where EAP was started for you, and you'll see `ROOT.war` is deployed:
+Go back to the `Start Wildfly server` terminal in GitPod where EAP was started for you, and you'll see `ROOT.war` is deployed:
 
 <p align="center">
 <img src="../img/2-eap-deployed.png" width=700 align=center>
 </p>
 
-You can also find out that the inventory data is created in PostgreSQL. Run the following `psql` command in a Terminal:
+> **Hint:** If you accidentally closed the terminal that was running Wildfly, you can restart Wildfly with `$JBOSS_HOME/bin/standalone.sh -b 0.0.0.0`
+
+You can also find out that the inventory data is created in PostgreSQL. Run the following `psql` command in the GitPod Terminal:
 
 ```shell
 PGPASSWORD=coolstore123 psql -h localhost -U coolstore monolith -c 'select itemid, quantity from INVENTORY;'
@@ -544,9 +563,9 @@ The output should look like:
 (9 rows)
 ```
 
-#### Congratulations!
+## 3.5 - Summary
 
-Let's open a simple browser then access the application. Click on `Remote Explorer` on the left, you will see open ports. Then, click on `Open Browser` icon next to port `8080` (the default web server port for JBoss EAP):
+Let's open a simple browser then access the application. Click on the list of ports at the very bottom of the screen (see below), or press `F1` and select `View: Toggle Ports`. Then, click on the small globe icon next to port `8080` (the default web server port for JBoss EAP):
 
 <p align="center">
 <img src="../img/2-open-browser.png" width=700 align=center>
@@ -558,12 +577,10 @@ It will open a new web browser to showcase the CoolStore web app:
 <img src="../img/2-coolstore_web.png" width=700 align=center>
 </p>
 
-#### Summary
-
 Now that you have migrated an existing Java EE app on JBoss EAP, you are ready to start modernizing the application by deploying it on Azure App Service in incremental steps, and employing modern techniques to ensure the application runs well in a distributed and cloud environment.
 
 ----
 
-⬅️ Previous section: [1 - Learn about Azure App Service](1-learn-about-app-service.md)
+⬅️ Previous section: [2 - Learn about Azure App Service](2-learn-about-app-service.md)
 
-➡️ Next section: [3 - Deploy to App Service](3-create-postgres-on-azure.md)
+➡️ Next section: [4 - Create and Configure PostgreSQL on Azure](4-create-postgres-on-azure.md)
